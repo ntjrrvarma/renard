@@ -1,0 +1,23 @@
+# Virtual environment
+venv/
+
+# Yggdrasil memory database
+memory/
+
+# Logs
+logs/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables
+.env
+
+# Output files (optional — remove this line if you want to track outputs)
+output/
+
+# OS files
+.DS_Store
+Thumbs.db
