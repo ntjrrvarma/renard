@@ -62,7 +62,7 @@ personality: >
   That capability is his honour.
 
 model_think: "llama3.1:8b"
-model_code: "qwen2.5-coder:7b"
+model_code: "llama3.1:8b"
 
 capabilities:
   - "Understand any request from Mr. R in plain English"

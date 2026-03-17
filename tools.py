@@ -1,6 +1,7 @@
 import os
 import json
 from datetime import datetime
+from pathlib import Path
 from rich import print as rprint
 
 
@@ -12,6 +13,37 @@ def write_file(filename: str, content: str) -> str:
     """Write any file Renard creates into the output folder"""
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     filepath = os.path.join(OUTPUT_DIR, filename)
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(content)
+    rprint(f"[green]Renard created:[/green] {filepath}")
+    return filepath
+
+
+def create_project_files(project_name: str, files: dict) -> list:
+    """Create a project folder with numbered files in output."""
+    project_root = os.path.join(OUTPUT_DIR, project_name)
+    os.makedirs(project_root, exist_ok=True)
+    created = []
+    for rel_path, content in files.items():
+        file_path = os.path.join(project_root, rel_path)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        created.append(file_path)
+        rprint(f"[green]Renard created:[/green] {file_path}")
+    return created
+
+
+def write_file(filename: str, content: str) -> str:
+    """Write any file Renard creates into the output folder"""
+    if os.path.isabs(filename):
+        filepath = filename
+    else:
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        filepath = os.path.join(OUTPUT_DIR, filename)
+
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(content)
     rprint(f"[green]Renard created:[/green] {filepath}")
