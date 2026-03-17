@@ -71,20 +71,50 @@ class Yggdrasil:
         if total == 0:
             return "No memories yet."
 
-        results = self.collection.query(
-            query_texts=["recent conversation"],
-            n_results=min(n, total)
-        )
+        try:
+            results = self.collection.get(
+                include=["documents", "metadatas"],
+                limit=min(n * 5, total)
+            )
+        except Exception:
+            # fallback to semantic query when get is unavailable
+            results = self.collection.query(
+                query_texts=["recent conversation"],
+                n_results=min(n, total)
+            )
 
-        if not results["documents"][0]:
+        docs = []
+        metas = []
+        if "documents" in results and results["documents"]:
+            docs = results["documents"]
+            metas = results.get("metadatas", [])
+
+        if not docs:
             return "Nothing recent found."
 
+        # output from query may be list-of-lists, flatten if necessary
+        if isinstance(docs[0], list):
+            docs = docs[0]
+            metas = metas[0] if metas and isinstance(metas[0], list) else []
+
+        ranked = []
+        for doc, meta in zip(docs, metas):
+            ts = meta.get("timestamp") if isinstance(meta, dict) else None
+            try:
+                ts_val = datetime.fromisoformat(ts) if ts else datetime.min
+            except Exception:
+                ts_val = datetime.min
+            ranked.append((ts_val, doc, meta))
+
+        ranked.sort(key=lambda item: item[0], reverse=True)
+        top = ranked[:n]
+
         memories = []
-        for doc, meta in zip(
-            results["documents"][0],
-            results["metadatas"][0]
-        ):
-            date = meta["timestamp"][:16].replace("T", " at ")
+        for ts_val, doc, meta in top:
+            if isinstance(meta, dict) and "timestamp" in meta:
+                date = meta["timestamp"][:16].replace("T", " at ")
+            else:
+                date = ts_val.strftime("%Y-%m-%d %H:%M")
             memories.append(f"[{date}]\n{doc}")
 
         return "\n\n---\n\n".join(memories)

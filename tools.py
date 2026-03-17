@@ -11,9 +11,16 @@ OUTPUT_DIR = "./output"
 
 def write_file(filename: str, content: str) -> str:
     """Write any file Renard creates into the output folder"""
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    filepath = os.path.join(OUTPUT_DIR, filename)
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    if os.path.isabs(filename):
+        filepath = filename
+    else:
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        filepath = os.path.join(OUTPUT_DIR, filename)
+
+    dirname = os.path.dirname(filepath)
+    if dirname:
+        os.makedirs(dirname, exist_ok=True)
+
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(content)
     rprint(f"[green]Renard created:[/green] {filepath}")
@@ -33,21 +40,6 @@ def create_project_files(project_name: str, files: dict) -> list:
         created.append(file_path)
         rprint(f"[green]Renard created:[/green] {file_path}")
     return created
-
-
-def write_file(filename: str, content: str) -> str:
-    """Write any file Renard creates into the output folder"""
-    if os.path.isabs(filename):
-        filepath = filename
-    else:
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
-        filepath = os.path.join(OUTPUT_DIR, filename)
-
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(content)
-    rprint(f"[green]Renard created:[/green] {filepath}")
-    return filepath
 
 
 def log_conversation(user_msg: str, renard_reply: str):

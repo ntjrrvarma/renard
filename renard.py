@@ -43,36 +43,7 @@ class Renard:
             f"{self.memory.count()} memories in Yggdrasil"
         )
 
-    def _classify_request(self, message: str) -> str:
-        """
-        Understand what kind of request this is
-        so Renard uses the right model and approach
-        """
-        prompt = f"""
-Classify this message into exactly one category.
-Return only the category word, nothing else.
-
-Categories:
-- code        (writing, reviewing, or explaining code)
-- plan        (planning projects, features, empire decisions)
-- question    (general question needing an answer)
-- memory      (asking about past conversations or history)
-- status      (asking about the empire, agents, progress)
-- task        (asking Renard to do or create something)
-- conversation (general chat, thinking out loud)
-
-Message: {message}
-
-Category:"""
-
-        response = ollama.chat(
-            model=self.model_think,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        category = response["message"]["content"].strip().lower()
-
-        valid = {"code","plan","question","memory", "status","task","conversation"}
-        return category if category in valid else "conversation"
+    # old _classify_request definition removed to avoid duplicate method definition
 
     def _build_system_prompt(self, past_context: str, category: str) -> str:
         empire_status = get_empire_status()
@@ -237,11 +208,7 @@ Category:"""
         # 2. pull relevant memory
         past_context = self.memory.recall(message)
 
-        # 3. choose model based on category
-        model = (self.model_code
-                 if category == "code"
-                 else self.model_think)
-
+        # 3. (model set already) no redundant assignment here
         logging.info(f"Request type: {category} · model: {model}")
 
         # 4. build system prompt
@@ -281,7 +248,7 @@ Category:"""
             context=category
         )
 
-        # 8. log to daily log file
+        # 9. log to daily log file
         log_conversation(message, reply)
 
         logging.info(f"Yggdrasil updated. "f"{self.memory.count()} memories stored.")
@@ -371,11 +338,13 @@ Category:"""
         return filename, code
 
     def _build_mermaid_diagram(self, project_name: str, files: list) -> str:
-        lines = ["```mermaid", "graph TD", f"root[\"{project_name}\"]"]
+        lines = ["```mermaid", "graph TD", f"\"root\"[\"{project_name}\"]"]
         for f in files:
             node = re.sub(r"[^a-zA-Z0-9_]+", "_", f)
-            lines.append(f"    {node}[\"{f}\"]")
-            lines.append(f"    root --> {node}")
+            node_id = f"\"{node}\""
+            label = f.replace('"', '\\"')
+            lines.append(f"    {node_id}[\"{label}\"]")
+            lines.append(f"    \"root\" --> {node_id}")
         lines.append("```")
         return "\n".join(lines)
 
@@ -401,9 +370,17 @@ Category:"""
                 target = os.path.join(project_dir, self._detect_filename(request, "py"))
                 with open(target, "w", encoding="utf-8") as f:
                     f.write(stripped)
-                reply += (f"\n\n---\nFiles saved under `output/{project_name}`.\n"
-                          f"Open it in VS Code to review, {self.founder}.")
+
+                # produce a clean response that directs to folder + diagram
+                reply = (
+                    f"Project created at `output/{project_name}` with file `{os.path.relpath(target, project_dir)}`.\n"
+                    f"Review files in your workspace under {project_dir}."
+                )
                 reply += "\n\n" + self._build_mermaid_diagram(project_name, [os.path.basename(target)])
+            else:
+                reply = (
+                    "No code block found to save. Please provide fenced code blocks or clear code text."
+                )
             return reply
 
         files = {}
@@ -422,9 +399,9 @@ Category:"""
             created_files.append(os.path.relpath(target, project_dir))
 
         file_list = "\n".join(f"- {p}" for p in created_files)
-        reply += (
-            f"\n\n---\nProject created at `output/{project_name}` with files:\n{file_list}\n"
-            f"Open it in VS Code to review, {self.founder}."
+        reply = (
+            f"Project created at `output/{project_name}` with files:\n{file_list}\n"
+            f"Review in VS Code at `{project_dir}`."
         )
         reply += "\n\n" + self._build_mermaid_diagram(project_name, created_files)
 

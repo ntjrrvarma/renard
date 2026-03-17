@@ -21,3 +21,15 @@ output/
 # OS files
 .DS_Store
 Thumbs.db
+
+# VS Code workspace files
+.vscode/
+
+# pytest artifacts
+.pytest_cache/
+
+# Jupyter checkpoint files
+.ipynb_checkpoints/
+
+# local overrides
+local_settings.json
