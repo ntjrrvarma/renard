@@ -1,68 +1,81 @@
-# Renkai — Renard (Executive Proxy · Level 0)
+# 🦊 Renkai — Renard (Executive Proxy · Level 0)
 
-The first agent of Renkai. Built with Ollama, ChromaDB, and Streamlit.
+> "The fox who was here before the name existed — now the name has part of mine in it."
 
-## Setup
+**Renard** is the first agent of the Renkai empire. A local-first, high-precision executive proxy designed to serve Mr. R with absolute loyalty, memory, and code-generation capabilities.
 
-1. Install Ollama and pull models:
-   ollama pull llama3.1:8b
-   ollama pull qwen2.5-coder:7b
+---
 
-2. Create virtual environment:
-   python -m venv venv
-   venv\Scripts\activate
+## 🏗️ Architecture Overview
 
-3. Install dependencies:
-   pip install -r requirements.txt
+Renard is built for speed, privacy, and long-term memory. It runs entirely on local hardware using Ollama and ChromaDB.
 
-4. Run Renard:
-   streamlit run app.py
+```mermaid
+graph TD
+    User((Mr. R)) <--> UI[Streamlit Interface]
+    UI <--> Renard[Renard Agent Class]
+    Renard <--> Memory[(Yggdrasil: ChromaDB)]
+    Renard <--> Think[Ollama: Llama 3.1]
+    Renard <--> Code[Ollama: Qwen 2.5 Coder]
+    Renard --> Logs[Daily Logs]
+    Renard --> Output[Generated Code / Projects]
+```
 
-## Stack
-- Brain: llama3.1:8b
-- Builder: qwen2.5-coder:7b
-- Memory: ChromaDB (Yggdrasil)
-- UI: Streamlit
-- Runtime: Ollama (fully local)
+## 🚀 Quick Start
 
-## The Crew
-- Renard — Executive Proxy · Level 0 · 1 tail
-- More agents coming as the empire grows
+### 1. Prerequisites
+- **Ollama**: [Download and install](https://ollama.com/)
+- **Models**:
+  ```bash
+  ollama pull llama3.1:8b
+  ollama pull qwen2.5-coder:7b
+  ```
+
+### 2. Setup Environment
+```bash
+# Create virtual environment
+python -m venv venv
+venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 3. Launch Renard
+```bash
+streamlit run app.py
+```
+
+---
+
+## 🛡️ Key Features
+
+- **Local-First**: No data leaves your machine. Full privacy.
+- **Yggdrasil Memory**: Permanent long-term memory that recalls past context automatically.
+- **Auto-Coding**: Automatically detects coding requests, generates files, and saves them to the `output/` directory.
+- **Persona Enforcement**: Hardened output rules ensure Renard stays in character—no chatbot apologies, no menu options, just execution.
+- **Empire Status**: Tracks the growth of the Renkai empire and Renard's progression (Level/Tails).
+
+---
+
+## 📚 Documentation
+
+For deep dives into the system, explore the `docs/` directory:
+
+- [**Architecture Guide**](docs/ARCHITECTURE.md): Deep dive into components and data flow.
+- [**Persona Guide**](docs/PERSONAS.md): Customizing Renard's soul and behavior.
+- [**API Reference**](docs/API.md): Developer guide for classes and methods.
+- [**Documentation Portal**](docs/index.html): A premium visual landing page for the project.
+
+---
+
+## 🚦 Safety & CI
+Renard includes a robust testing suite and CI/CD pipeline:
+- **Unit Tests**: `test_renard.py` validates persona alignment and logic.
+- **GitHub Actions**: Automated testing on every push to main.
+- **Run Tests Locally**: `pytest -q`
+
+---
 
 *Renkai — the fox who pioneers new worlds.*
 
-## 🚦 New safety & CI features
-### Agent behavior hardening
-- `renard.py` now validates model output before returning:
-  - enforces persona rules (no menu options, no "next step", no "please specify")
-  - detects and flags uncertain/hallucinatory phrasing
-  - avoids unsafe model exceptions with fallback message
-- `yggdrasil.py` stays responsible for memory recall and persistence
-- `tools.py` handles file log/output utility functions
-
-### Unit tests
-- `test_renard.py` added:
-  - `test_find_personality_violations`
-  - `test_sanitize_reply_removes_violations`
-  - `test_check_hallucination_adds_warning`
-  - `test_classify_request_fallback_on_failure`
-  - `test_think_code_writes_file`
-
-### Local test run
-1. `venv\\Scripts\\python.exe -m pip install -r requirements.txt`
-2. `venv\\Scripts\\python.exe -m pytest -q`
-
-### GitHub Actions
-- `.github/workflows/python-tests.yml` runs on:
-  - `push` to `main` / `master`
-  - `pull_request` to `main` / `master`
-- Steps:
-  1. checkout repo
-  2. setup Python 3.11
-  3. install requirements + pytest
-  4. run `pytest -q`
-
-### If PowerShell activation is blocked
-- `powershell -ExecutionPolicy Bypass -NoProfile -Command "cd C:\\Users\\nrrah\\Documents\\renard; .\\venv\\Scripts\\Activate.ps1; pip install -r requirements.txt; pytest -q"`
-- or use direct interpreter path:
-  - `C:\\Users\\nrrah\\Documents\\renard\\venv\\Scripts\\python.exe -m pytest -q`
